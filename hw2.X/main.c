@@ -61,6 +61,8 @@ int main() {
     while (1) {
         // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
         // remember the core timer runs at half the sysclk
+        // sysclk 48MHz, core timer 24MHz
+        // 1s = 24 million ticks
         
         // if B4 is 1/on:
         // turn on A4, delay 0.5s
@@ -68,15 +70,19 @@ int main() {
         // turn on A4, delay 0.5s
         // turn off A4
         
-        if ( PORTBbits.RB4 == 1 ) {
+        if ( PORTBbits.RB4 == 0 ) {
             LATAbits.LATA4 = 1;
-            __delay_ms(500);
+            _CP0_SET_COUNT(0);
+            while (_CP0_GET_COUNT() < 12000000 ) {}
             LATAbits.LATA4 = 0;
-            __delay_ms(500);
+            _CP0_SET_COUNT(0);
+            while (_CP0_GET_COUNT() < 12000000 ) {}
             LATAbits.LATA4 = 1;
-            __delay_ms(500);
+            _CP0_SET_COUNT(0);
+            while (_CP0_GET_COUNT() < 12000000 ) {}
             LATAbits.LATA4 = 0;
-            __delay_ms(500);
+            _CP0_SET_COUNT(0);
+            while (_CP0_GET_COUNT() < 12000000 ) {}
         }
     }
 }
