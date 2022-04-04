@@ -49,12 +49,34 @@ int main() {
     DDPCONbits.JTAGEN = 0;
 
     // do your TRIS and LAT commands here
+    TRISAbits.TRISA4 = 0; // made TRISA an output
+    LATAbits.LATA4 = 0; // turned TRISA off
+    
+    TRISBbits.TRISB4 = 1; // made TRISB an input
+    LATBbits.LATB4 = 0; // turned TRISB off
+    
 
     __builtin_enable_interrupts();
 
     while (1) {
         // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
         // remember the core timer runs at half the sysclk
-
+        
+        // if B4 is 1/on:
+        // turn on A4, delay 0.5s
+        // turn off A4, delay 0.5s
+        // turn on A4, delay 0.5s
+        // turn off A4
+        
+        if ( PORTBbits.RB4 == 1 ) {
+            LATAbits.LATA4 = 1;
+            __delay_ms(500);
+            LATAbits.LATA4 = 0;
+            __delay_ms(500);
+            LATAbits.LATA4 = 1;
+            __delay_ms(500);
+            LATAbits.LATA4 = 0;
+            __delay_ms(500);
+        }
     }
 }
