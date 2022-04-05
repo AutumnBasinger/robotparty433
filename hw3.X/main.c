@@ -60,7 +60,7 @@ int main() {
     LATBbits.LATB4 = 0; // turned TRISB off
     
     U1RXRbits.U1RXR = 0b0001; // U1RX is B6
-    RPB7Rbits.RPB7R = 0b0001; // U1TX is B7 / probably wrong
+    RPB7Rbits.RPB7R = 0b0001; // U1TX is B7 / is this right?
     
     // turn on UART1 without an interrupt
     U1MODEbits.BRGH = 0; // set baud to NU32_DESIRED_BAUD
@@ -79,7 +79,7 @@ int main() {
 
     __builtin_enable_interrupts();
     
-    char m[100];
+    int i = 0;
 
     while (1) {
         // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
@@ -94,15 +94,19 @@ int main() {
             LATAbits.LATA4 = 0;
             _CP0_SET_COUNT(0);
             while (_CP0_GET_COUNT() < 12000000 ) {}
-            LATAbits.LATA4 = 1;
-            _CP0_SET_COUNT(0);
-            while (_CP0_GET_COUNT() < 12000000 ) {}
-            LATAbits.LATA4 = 0;
-            _CP0_SET_COUNT(0);
-            while (_CP0_GET_COUNT() < 12000000 ) {}
+//            LATAbits.LATA4 = 1;
+//            _CP0_SET_COUNT(0);
+//            while (_CP0_GET_COUNT() < 12000000 ) {}
+//            LATAbits.LATA4 = 0;
+//            _CP0_SET_COUNT(0);
+//            while (_CP0_GET_COUNT() < 12000000 ) {}
             
-            sprintf(m, "Test!");
+            // mac terminal: screen /dev/tty.usbserial-0232C13E 115200
+           
+            char m[100];
+            sprintf(m, "Blink! %d\r\n", i);
             writeUART1(m);
+            i++;
         }
     }
 }
