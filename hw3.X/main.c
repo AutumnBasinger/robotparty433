@@ -102,6 +102,7 @@ int main() {
 //            while (_CP0_GET_COUNT() < 12000000 ) {}
             
             // mac terminal: screen /dev/tty.usbserial-0232C13E 115200
+            // cntrl a, cntrl k to quit screen
            
             char m[100];
             sprintf(m, "Blink! %d\r\n", i);
