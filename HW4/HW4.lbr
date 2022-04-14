@@ -13217,11 +13217,11 @@ Source: http://www.ledtronics.com/ds/smd-0603/Dstr0092.pdf</description>
 <text x="12.7" y="0" size="1.27" layer="94">&gt;VALUE</text>
 </symbol>
 <symbol name="FIVE">
-<pin name="P$1" x="-7.62" y="0" length="middle"/>
-<pin name="P$2" x="-7.62" y="5.08" length="middle"/>
-<pin name="P$3" x="-7.62" y="10.16" length="middle"/>
-<pin name="P$4" x="-7.62" y="-5.08" length="middle"/>
-<pin name="P$5" x="-7.62" y="-10.16" length="middle"/>
+<pin name="3" x="-7.62" y="0" length="middle"/>
+<pin name="2" x="-7.62" y="5.08" length="middle"/>
+<pin name="1" x="-7.62" y="10.16" length="middle"/>
+<pin name="4" x="-7.62" y="-5.08" length="middle"/>
+<pin name="5" x="-7.62" y="-10.16" length="middle"/>
 <text x="7.62" y="2.54" size="1.27" layer="94">&gt;NAME</text>
 <text x="7.62" y="-2.54" size="1.27" layer="94">&gt;VALUE</text>
 <wire x1="-5.08" y1="12.7" x2="-5.08" y2="-12.7" width="0.254" layer="94"/>
@@ -19392,25 +19392,6 @@ Source: www.kingbright.com</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="MICROUSB">
-<gates>
-<gate name="G$1" symbol="MICROUSB" x="-2.54" y="0"/>
-</gates>
-<devices>
-<device name="" package="MICROUSB">
-<connects>
-<connect gate="G$1" pin="1.VBUS" pad="1.VBUS"/>
-<connect gate="G$1" pin="2.D+" pad="2"/>
-<connect gate="G$1" pin="2.D-" pad="3"/>
-<connect gate="G$1" pin="4.ID" pad="4"/>
-<connect gate="G$1" pin="5.GND" pad="5.GND"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
 <deviceset name="SLIDE">
 <gates>
 <gate name="G$1" symbol="SLIDE" x="0" y="0"/>
@@ -19545,11 +19526,11 @@ Source: www.kingbright.com</description>
 <devices>
 <device name="" package="FIVE">
 <connects>
-<connect gate="G$1" pin="P$1" pad="1"/>
-<connect gate="G$1" pin="P$2" pad="2"/>
-<connect gate="G$1" pin="P$3" pad="3"/>
-<connect gate="G$1" pin="P$4" pad="4"/>
-<connect gate="G$1" pin="P$5" pad="5"/>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+<connect gate="G$1" pin="3" pad="3"/>
+<connect gate="G$1" pin="4" pad="4"/>
+<connect gate="G$1" pin="5" pad="5"/>
 </connects>
 <technologies>
 <technology name=""/>
