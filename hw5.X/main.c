@@ -63,19 +63,32 @@ int main() {
     unsigned char i = 0;
 
     while (1) {
-        // write one bye over SPI1
-        LATAbits.LATA0 = 0; // Bring CS low
-        spi_io(i); // write the byte
-        LATAbits.LATA0 = 1; // bring CS high
+        // unsigned char volta = (sin(t) + 1) * 128;
+        // unsigned char volta = 128 * sin(2 * M_PI * 2 * t)
+        unsigned short value = make_value(0, volta); // turn to 16 bit number
+        LATAbits.LATA4 = 0; // set CS high
+        unsigned short a1 = value >> 8;
+        unsigned short a2 = value;
+        spi_io(a1);
+        spi_io(a2);
+        LATAbits.LATA4 = 1; // set CS low
         
+        // unsigned char voltb = 1; // get voltage
+        unsigned short value = make_value(0, voltb); // turn to 16 bit number
+        LATAbits.LATA4 = 0; // set CS high
+        unsigned short b1 = value >> 8; // first 8
+        unsigned short b2 = value; // second 8
+        spi_io(b1);
+        spi_io(b2);
+        LATAbits.LATA4 = 1; // set CS low
+        
+        _CP0_SET_COUNT(0);
+        while (_CP0_GET_COUNT() < 4800000 / 2) {} // delay
+                      
         i++;
         if (i == 100) {
             i = 0;
-        }
-        
-        _CP0_SET_COUNT(0);
-        while (_CP0_GET_COUNT() < 4800000 / 2) {
-        }            
+        }        
     }
 }
 
@@ -85,8 +98,8 @@ void initSPI() {
     // Turn of analog pins
     ANSELA = 0; // 1 for analog
     // Make an output pin for CS
-    TRISAbits.TRISA0 = 0;
-    LATAbits.LATA0 = 1;
+    TRISAbits.TRISA0 = 0; //CS pin
+    LATAbits.LATA0 = 1; // CS pin
     // Set SDO1
     RPA1Rbits.RPA1R = 0b0011;
     // Set SDI1
@@ -109,4 +122,12 @@ unsigned char spi_io(unsigned char o) {
         ; // wait to receive byte
     }
     return SPI1BUF;
+}
+
+unsigned short make_value(unsigned char ab, unsigned char v) {
+    unsigned short s = 0; // 16 bit number
+    s = ab << 15; // ab to place 1
+    s = s | (0b111 << 12);
+    s = s | (v << 4);
+    return s;
 }
