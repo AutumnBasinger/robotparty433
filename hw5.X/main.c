@@ -1,5 +1,6 @@
 #include<xc.h>           // processor SFR definitions
 #include<sys/attribs.h>  // __ISR macro
+#include<math.h>
 
 // DEVCFG0
 #pragma config DEBUG = OFF // disable debugging
@@ -34,6 +35,8 @@
 
 void initSPI();
 unsigned char spi_io(unsigned char o);
+unsigned short make_value(unsigned char ab, unsigned char v);
+
 
 int main() {
 
@@ -61,34 +64,52 @@ int main() {
     __builtin_enable_interrupts();
     
     unsigned char i = 0;
+    float t = 0;
+    int up = 0; // signed 32 bit number
+    int tri = 0;
 
     while (1) {
-        // unsigned char volta = (sin(t) + 1) * 128;
-        // unsigned char volta = 128 * sin(2 * M_PI * 2 * t)
-        unsigned short value = make_value(0, volta); // turn to 16 bit number
-        LATAbits.LATA4 = 0; // set CS high
-        unsigned short a1 = value >> 8;
-        unsigned short a2 = value;
+        unsigned char volta = (sin(2*3.14*2*t) + 1) * 128;
+        unsigned short vala = make_value(0, volta); // turn to 16 bit number
+        LATAbits.LATA0 = 0; // set CS high
+        unsigned short a1 = vala >> 8;
+        unsigned short a2 = vala;
         spi_io(a1);
         spi_io(a2);
-        LATAbits.LATA4 = 1; // set CS low
+        LATAbits.LATA0 = 1; // set CS low
         
-        // unsigned char voltb = 1; // get voltage
-        unsigned short value = make_value(0, voltb); // turn to 16 bit number
-        LATAbits.LATA4 = 0; // set CS high
-        unsigned short b1 = value >> 8; // first 8
-        unsigned short b2 = value; // second 8
+        // sign up, tri down
+        
+        if (up == 0) {
+            tri = tri + (255/50);
+            if (tri > 255) {
+                up = 1;
+            }
+        }
+        
+        if (up == 1) {
+            tri = tri - (255/50);
+            if (tri < 0) {
+                up = 0;
+            }
+        }
+        
+        if (tri < 0) {
+            tri = 0;
+        }
+        
+        unsigned short valb = make_value(1, tri); // turn to 16 bit number
+        LATAbits.LATA0 = 0; // set CS high
+        unsigned short b1 = valb >> 8; // first 8
+        unsigned short b2 = valb; // second 8
         spi_io(b1);
         spi_io(b2);
-        LATAbits.LATA4 = 1; // set CS low
+        LATAbits.LATA0 = 1; // set CS low
         
         _CP0_SET_COUNT(0);
-        while (_CP0_GET_COUNT() < 4800000 / 2) {} // delay
-                      
-        i++;
-        if (i == 100) {
-            i = 0;
-        }        
+        while (_CP0_GET_COUNT() < 48000000 / 2 / 100) {} // delay 100 times per second
+        
+        t = t + .01;       
     }
 }
 
