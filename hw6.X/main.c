@@ -2,6 +2,7 @@
 #include<sys/attribs.h>  // __ISR macro
 #include <stdio.h>
 #include "i2c_master_noint.h"
+#include "i2c_master_noint.c"
 
 // DEVCFG0
 #pragma config DEBUG = OFF // disable debugging
@@ -61,7 +62,7 @@ int main() {
     LATBbits.LATB4 = 0; // turned TRISB off
     
     U1RXRbits.U1RXR = 0b0001; // U1RX is B6
-    RPB7Rbits.RPB7R = 0b0001; // U1TX is B7 / is this right?
+    RPB7Rbits.RPB7R = 0b0001; // U1TX is B7
     
     // turn on UART1 without an interrupt
     U1MODEbits.BRGH = 0; // set baud to NU32_DESIRED_BAUD
@@ -78,53 +79,37 @@ int main() {
     // enable UART
     U1MODEbits.ON = 1;
     
-    i2c_master_setup(); //
+    
+    // I2C CODE
+    
+    i2c_master_setup(); // setup
+
+    // 0b01000000 // write address
+    // 0b01000001 // read address
+    
+    // IODIR is 0x00, set to 0x00 (outputs), set to 0xFF (inputs)
+    
     mcpwrite(ADRESS, IODIR, 0b01111111); // init
     mcpwrite(ADRESS, OLAT, 0b10000000); // gp7 on
+    
     unsigned char r = mcpread(ADRESS, GIPO);
     
     if (r&0b1 == 0b1) {
         // push button
     }
 
-    
-    
-
     __builtin_enable_interrupts();
     
-    int i = 0;
-
     while (1) {
-        // gp7 on
-        // delay
-        // gp7 off
-        // delay
-        // blink
-               
-
+        PORTBbits.GP7 = 1; // GP7 on?
+        _CP0_SET_COUNT(0);
+        while (_CP0_GET_COUNT() < 12000000 ) {} // delay
         
-        if ( PORTBbits.RB4 == 0 ) {
-            LATAbits.LATA4 = 1;
-            _CP0_SET_COUNT(0);
-            while (_CP0_GET_COUNT() < 12000000 ) {}
-            LATAbits.LATA4 = 0;
-            _CP0_SET_COUNT(0);
-            while (_CP0_GET_COUNT() < 12000000 ) {}
-//            LATAbits.LATA4 = 1;
-//            _CP0_SET_COUNT(0);
-//            while (_CP0_GET_COUNT() < 12000000 ) {}
-//            LATAbits.LATA4 = 0;
-//            _CP0_SET_COUNT(0);
-//            while (_CP0_GET_COUNT() < 12000000 ) {}
-            
-            // mac terminal: screen /dev/tty.usbserial-0232C13E 115200
-            // cntrl a, cntrl k to quit screen
-           
-            char m[100];
-            sprintf(m, "Blink! %d\r\n", i);
-            writeUART1(m);
-            i++;
-        }
+        PORTBbits.GP7 = 0; // GP7 off?
+        _CP0_SET_COUNT(0);
+        while (_CP0_GET_COUNT() < 12000000 ) {} // delay
+
+        // blink heartbeat button
     }
 }
 
@@ -159,21 +144,30 @@ void writeUART1 (const char * string) {
     }
 }
 
-void mcpwrite(unsigned char ad, unsigned char reg, unsigned char val) {
+void mcp_write(unsigned char ad, unsigned char reg, unsigned char val) {
     i2c_master_start(); // start bit
-    i2c_master_send(ad<<1); // write bit
+    i2c_master_send(ad<<1); // write address
     i2c_master_send(reg); // register to change
-    i2c_master_send(val); // value to go in reg
+    i2c_master_send(val); // value register will take
     i2c_master_stop(); // stop bit
 }
 
-unsigned char mcpread(unsigned char ad, unsigned char reg) {
+unsigned char mcp_read(unsigned char ad, unsigned char reg) {
     i2c_master_start(); // start bit
-    i2c_master_send(ad<<1); // write bit
+    i2c_master_send(ad<<1); // read address
     i2c_master_send(reg); // register to change
-    i2c_master_send(ad<<1|0b1); // value to go in reg
+    i2c_master_send(ad<<1|0b1); // value register will take
     unsigned char r i2c_master_recv();
     i2c_master_ack(1); // done
     i2c_master_stop(); // stop bit
     return r;
+    
+    // start
+    // write address
+    // send reg
+    // restart bit
+    // read address
+    // get value
+    // acknowledge value
+    // stop bit
 }

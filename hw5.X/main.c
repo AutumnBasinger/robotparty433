@@ -96,7 +96,7 @@ int main() {
         
         if (tri < 0) {
             tri = 0;
-        }
+        }   
         
         unsigned short valb = make_value(1, tri); // turn to 16 bit number
         LATAbits.LATA0 = 0; // set CS high
