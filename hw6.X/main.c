@@ -2,7 +2,10 @@
 #include<sys/attribs.h>  // __ISR macro
 #include <stdio.h>
 #include "i2c_master_noint.h"
-#include "i2c_master_noint.c"
+
+#define IODIR 0x00
+#define OLAT 0x0A
+#define GPIO 0x09
 
 // DEVCFG0
 #pragma config DEBUG = OFF // disable debugging
@@ -37,6 +40,8 @@
 
 void readUART1(char * string, int maxLength);
 void writeUART1(const char * string);
+void mcp_write(unsigned char ad, unsigned char reg, unsigned char val);
+unsigned char mcp_read(unsigned char ad, unsigned char reg);
 
 int main() {
 
@@ -81,35 +86,30 @@ int main() {
     
     
     // I2C CODE
-    
     i2c_master_setup(); // setup
-
-    // 0b01000000 // write address
-    // 0b01000001 // read address
-    
-    // IODIR is 0x00, set to 0x00 (outputs), set to 0xFF (inputs)
-    
-    mcpwrite(ADRESS, IODIR, 0b01111111); // init
-    mcpwrite(ADRESS, OLAT, 0b10000000); // gp7 on
-    
-    unsigned char r = mcpread(ADRESS, GIPO);
-    
-    if (r&0b1 == 0b1) {
-        // push button
-    }
+ 
+    mcp_write(0b0100000, IODIR, 0b01111111); // leftmost output, 6 middle bits inputs, makes GP0 input (right) / GP7 output (left)
+    mcp_write(0b0100000, OLAT, 0b10000000); // makes GP7 on (leftmost bit)
 
     __builtin_enable_interrupts();
     
+    unsigned char r;
+    
     while (1) {
-        PORTBbits.GP7 = 1; // GP7 on?
-        _CP0_SET_COUNT(0);
-        while (_CP0_GET_COUNT() < 12000000 ) {} // delay
+        r = mcp_read(0b0100000, GPIO); // 8 bits
+        if (r&0b1 == 0b1) { // if button pushed
+            mcp_write(0b0100000, OLAT, 0b00000000); // GP7 LED high
+        } else {
+            mcp_write(0b0100000, OLAT, 0b10000000); // GP7 LED low
+        };
         
-        PORTBbits.GP7 = 0; // GP7 off?
-        _CP0_SET_COUNT(0);
-        while (_CP0_GET_COUNT() < 12000000 ) {} // delay
-
-        // blink heartbeat button
+        //blink heartbeat
+        LATAbits.LATA4 = 1; // LED on
+        _CP0_SET_COUNT(0); // set 0
+        while (_CP0_GET_COUNT() < 1200000 ) {} // delay
+        LATAbits.LATA4 = 0; // LED off
+        _CP0_SET_COUNT(0); // set 0
+        while (_CP0_GET_COUNT() < 1200000 ) {} // delay
     }
 }
 
@@ -156,18 +156,11 @@ unsigned char mcp_read(unsigned char ad, unsigned char reg) {
     i2c_master_start(); // start bit
     i2c_master_send(ad<<1); // read address
     i2c_master_send(reg); // register to change
+    i2c_master_restart(); // restart bit
     i2c_master_send(ad<<1|0b1); // value register will take
-    unsigned char r i2c_master_recv();
-    i2c_master_ack(1); // done
+    unsigned char r = i2c_master_recv();
+    i2c_master_ack(1); // acknowledge
     i2c_master_stop(); // stop bit
     return r;
-    
-    // start
-    // write address
-    // send reg
-    // restart bit
-    // read address
-    // get value
-    // acknowledge value
-    // stop bit
+   
 }
