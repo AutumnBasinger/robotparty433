@@ -195,3 +195,4 @@ void drawLetter(char x, char y, char start) { // (u char, x, y, letter) (x, y, m
 }
 
  // {0x7e, 0x11, 0x11, 0x11, 0x7e} // 41 A
+ // ASCII[41][5]
