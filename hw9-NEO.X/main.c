@@ -1,11 +1,7 @@
 #include<xc.h>           // processor SFR definitions
 #include<sys/attribs.h>  // __ISR macro
-#include <stdio.h>
-#include "i2c_master_noint.h"
-
-#define IODIR 0x00
-#define OLAT 0x0A
-#define GPIO 0x09
+#include<stdio.h>
+#include "ws2812b.h"
 
 // DEVCFG0
 #pragma config DEBUG = OFF // disable debugging
@@ -40,8 +36,6 @@
 
 void readUART1(char * string, int maxLength);
 void writeUART1(const char * string);
-void mcp_write(unsigned char ad, unsigned char reg, unsigned char val);
-unsigned char mcp_read(unsigned char ad, unsigned char reg);
 
 int main() {
 
@@ -66,61 +60,68 @@ int main() {
     TRISBbits.TRISB4 = 1; // made TRISB an input
     LATBbits.LATB4 = 0; // turned TRISB off
     
-    U1RXRbits.U1RXR = 0b0001; // U1RX is B6
-    RPB7Rbits.RPB7R = 0b0001; // U1TX is B7
-    
-    // turn on UART1 without an interrupt
-    U1MODEbits.BRGH = 0; // set baud to NU32_DESIRED_BAUD
-    U1BRG = ((48000000 / 115200) / 16) - 1;
-    
-    // 8 bit, no parity bit, 1 stop bit (8N1 setup)
-    U1MODEbits.PDSEL = 0;
-    U1MODEbits.STSEL = 0;
-    
-    // configure TX & RX pins as output & input pins
-    U1STAbits.UTXEN = 1;
-    U1STAbits.URXEN = 1;
-    
-    // enable UART
-    U1MODEbits.ON = 1;
-    
-    
-    // I2C CODE
-    i2c_master_setup(); // setup
- 
-    mcp_write(0b0100000, IODIR, 0b01111111); // leftmost output, 6 middle bits inputs, makes GP0 input (right) / GP7 output (left)
-    mcp_write(0b0100000, OLAT, 0b10000000); // makes GP7 on (leftmost bit)
+//    U1RXRbits.U1RXR = 0b0001; // U1RX is B6
+//    RPB7Rbits.RPB7R = 0b0001; // U1TX is B7 / is this right?
+//    
+//    // turn on UART1 without an interrupt
+//    U1MODEbits.BRGH = 0; // set baud to NU32_DESIRED_BAUD
+//    U1BRG = ((48000000 / 115200) / 16) - 1;
+//    
+//    // 8 bit, no parity bit, 1 stop bit (8N1 setup)
+//    U1MODEbits.PDSEL = 0;
+//    U1MODEbits.STSEL = 0;
+//    
+//    // configure TX & RX pins as output & input pins
+//    U1STAbits.UTXEN = 1;
+//    U1STAbits.URXEN = 1;
+//    
+//    // enable UART
+//    U1MODEbits.ON = 1;
 
     __builtin_enable_interrupts();
     
-    unsigned char r;
+    ws2812b_setup(); // timer is on
+    wsColor leds[5]; // array of 5 LEDs
     
-    char message[50];
-    char i = 0;
+    leds[0].r = 0;
+    leds[0].g = 0;
+    leds[0].b = 0;
     
-    while (1) { 
-        //blink heartbeat (keep)
-        LATAbits.LATA4 = 1; // LED on
-        _CP0_SET_COUNT(0); // set 0
-        while (_CP0_GET_COUNT() < 1200000 ) {} // delay
-        LATAbits.LATA4 = 0; // LED off
-        _CP0_SET_COUNT(0); // set 0
-        while (_CP0_GET_COUNT() < 1200000 ) {} // delay
-        
-        // SSD code
-        
-        // pixel on then off
-        ssd1306_setup(); // setup
-        ssd1306_drawPixel(5,5,1) // x,y,color
-        _CP0_SET_COUNT(0); // set 0
-        while (_CP0_GET_COUNT() < 1200000 ) {} // delay
-        ssd1306_drawPixel(5,5,0); // x,y,color
-                
-        // message code
-//        sprintf(message, "test", i);
-//        drawMessage(10,10,message); // draw message starting at 10,10
-        
+    leds[1].r = 0;
+    leds[1].g = 0;
+    leds[1].b = 0;
     
+    leds[2].r = 0;
+    leds[2].g = 0;
+    leds[2].b = 0;
+    
+    leds[3].r = 0;
+    leds[3].g = 0;
+    leds[3].b = 0;
+    
+    leds[4].r = 0;
+    leds[4].g = 0;
+    leds[4].b = 0;
+    
+    
+    float colors[5] = {0,72,144,216,288};
+               
+    while (1) {
+        
+        for (int i=0; i<=4; i++) {
+            leds[i] = HSBtoRGB(colors[i],1,0.1);
+            colors[i] = colors[i] + 1;
+            if (colors[i] == 360) {
+                colors[i] = 0;
+            }
+        }
+        
+        ws2812b_setColor(leds, 5);
+            
+        _CP0_SET_COUNT(0);
+        while (_CP0_GET_COUNT() < 120000 ) {}      
+
+
     }
 }
 
@@ -154,45 +155,3 @@ void writeUART1 (const char * string) {
         ++string;
     }
 }
-
-void mcp_write(unsigned char ad, unsigned char reg, unsigned char val) {
-    i2c_master_start(); // start bit
-    i2c_master_send(ad<<1); // write address
-    i2c_master_send(reg); // register to change
-    i2c_master_send(val); // value register will take
-    i2c_master_stop(); // stop bit
-}
-
-unsigned char mcp_read(unsigned char ad, unsigned char reg) {
-    i2c_master_start(); // start bit
-    i2c_master_send(ad<<1); // read address
-    i2c_master_send(reg); // register to change
-    i2c_master_restart(); // restart bit
-    i2c_master_send(ad<<1|0b1); // value register will take
-    unsigned char r = i2c_master_recv();
-    i2c_master_ack(1); // acknowledge
-    i2c_master_stop(); // stop bit
-    return r;
-   
-}
-
-void drawMessage(char x, char y, char start){ // contains letters to draw
-    // get letter from sprintf, shift by 20?
-    // char*m, char x, char y
-    while (start != '\0' || '0') { // loop through letters
-        drawLetter(x, y, start); // send 1 letter and x,y start position
-    }
-}
-
-void drawLetter(char x, char y, char start) { // (u char, x, y, letter) (x, y, m[i])
-    // find ascii row of character, loop through columns
-    // for i = 0 to 4
-    // for j = 0 to 7
-    // col: from ascii[letter-0x20][i]
-    // on/off = col&0b1
-    // on/off = (col<<j);
-    // drawPixel (x + i, y + j, onoff)
-}
-
- // {0x7e, 0x11, 0x11, 0x11, 0x7e} // 41 A
- // ASCII[41][5]
