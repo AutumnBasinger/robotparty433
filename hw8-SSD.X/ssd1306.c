@@ -6,12 +6,11 @@
 
 unsigned char ssd1306_write = 0b01111000; // i2c address
 unsigned char ssd1306_read = 0b01111001; // i2c address
-unsigned char ssd1306_buffer[512]; // 128x32/8. Every bit is a pixel // 4096 bit array (on screen)
+unsigned char ssd1306_buffer[512]; // array of 512 chars, each char 8 bits, each bit 1 pixel, 128*32 pixels (4096) /8 = 512 bytes
 
 void ssd1306_setup() {
-    // give a little delay for the ssd1306 to power up
     _CP0_SET_COUNT(0);
-    while (_CP0_GET_COUNT() < 48000000 / 2 / 50) {
+    while (_CP0_GET_COUNT() < 48000000 / 2 / 50) { // small delay to power up
     }
     ssd1306_command(SSD1306_DISPLAYOFF);
     ssd1306_command(SSD1306_SETDISPLAYCLOCKDIV);
@@ -36,8 +35,8 @@ void ssd1306_setup() {
     ssd1306_command(SSD1306_SETVCOMDETECT);
     ssd1306_command(0x40);
     ssd1306_command(SSD1306_DISPLAYON);
-    ssd1306_clear();
-    ssd1306_update();
+    ssd1306_clear(); // all pixels off
+    ssd1306_update(); // all pixels off
 }
 
 // send a command instruction (not pixel data)

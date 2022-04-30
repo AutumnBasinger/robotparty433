@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "i2c_master_noint.h"
 
+// for I2C
 #define IODIR 0x00
 #define OLAT 0x0A
 #define GPIO 0x09
@@ -38,10 +39,10 @@
 #pragma config PMDL1WAY = OFF // allow multiple reconfigurations
 #pragma config IOL1WAY = OFF // allow multiple reconfigurations
 
-void readUART1(char * string, int maxLength);
-void writeUART1(const char * string);
-void mcp_write(unsigned char ad, unsigned char reg, unsigned char val);
-unsigned char mcp_read(unsigned char ad, unsigned char reg);
+//void readUART1(char * string, int maxLength);
+//void writeUART1(const char * string);
+//void mcp_write(unsigned char ad, unsigned char reg, unsigned char val);
+//unsigned char mcp_read(unsigned char ad, unsigned char reg);
 
 int main() {
 
@@ -68,53 +69,50 @@ int main() {
     
     U1RXRbits.U1RXR = 0b0001; // U1RX is B6
     RPB7Rbits.RPB7R = 0b0001; // U1TX is B7
+//    
+//    // turn on UART1 without an interrupt
+//    U1MODEbits.BRGH = 0; // set baud to NU32_DESIRED_BAUD
+//    U1BRG = ((48000000 / 115200) / 16) - 1;
+//    
+//    // 8 bit, no parity bit, 1 stop bit (8N1 setup)
+//    U1MODEbits.PDSEL = 0;
+//    U1MODEbits.STSEL = 0;
+//    
+//    // configure TX & RX pins as output & input pins
+//    U1STAbits.UTXEN = 1;
+//    U1STAbits.URXEN = 1;
+//    
+//    // enable UART
+//    U1MODEbits.ON = 1;
+//    
     
-    // turn on UART1 without an interrupt
-    U1MODEbits.BRGH = 0; // set baud to NU32_DESIRED_BAUD
-    U1BRG = ((48000000 / 115200) / 16) - 1;
-    
-    // 8 bit, no parity bit, 1 stop bit (8N1 setup)
-    U1MODEbits.PDSEL = 0;
-    U1MODEbits.STSEL = 0;
-    
-    // configure TX & RX pins as output & input pins
-    U1STAbits.UTXEN = 1;
-    U1STAbits.URXEN = 1;
-    
-    // enable UART
-    U1MODEbits.ON = 1;
-    
-    
-    // I2C CODE
-    i2c_master_setup(); // setup
+    i2c_master_setup(); // i2c setup
  
     mcp_write(0b0100000, IODIR, 0b01111111); // leftmost output, 6 middle bits inputs, makes GP0 input (right) / GP7 output (left)
     mcp_write(0b0100000, OLAT, 0b10000000); // makes GP7 on (leftmost bit)
+    
+//    ssd1306_setup(); // ssd setup
 
     __builtin_enable_interrupts();
     
-    unsigned char r;
-    
-    char message[50];
-    char i = 0;
+//    unsigned char r;
+//    
+//    char message[50];
+//    char i = 0;
     
     while (1) { 
         //blink heartbeat (keep)
         LATAbits.LATA4 = 1; // LED on
+        ssd1306_drawPixel(5,5,1); // pixel on
+        ssd1306_update();
         _CP0_SET_COUNT(0); // set 0
-        while (_CP0_GET_COUNT() < 1200000 ) {} // delay
+        while (_CP0_GET_COUNT() < 12000000 ) {} // delay
+        
         LATAbits.LATA4 = 0; // LED off
+        ssd1306_drawPixel(5,5,0); // pixel off
+        ssd1306_update();
         _CP0_SET_COUNT(0); // set 0
-        while (_CP0_GET_COUNT() < 1200000 ) {} // delay
-        
-        // SSD code
-        
-        // pixel on then off
-        ssd1306_setup(); // setup
-        ssd1306_drawPixel(5,5,1) // x,y,color
-        _CP0_SET_COUNT(0); // set 0
-        while (_CP0_GET_COUNT() < 1200000 ) {} // delay
-        ssd1306_drawPixel(5,5,0); // x,y,color
+        while (_CP0_GET_COUNT() < 12000000 ) {} // delay
                 
         // message code
 //        sprintf(message, "test", i);
@@ -176,23 +174,28 @@ unsigned char mcp_read(unsigned char ad, unsigned char reg) {
    
 }
 
-void drawMessage(char x, char y, char start){ // contains letters to draw
-    // get letter from sprintf, shift by 20?
-    // char*m, char x, char y
-    while (start != '\0' || '0') { // loop through letters
-        drawLetter(x, y, start); // send 1 letter and x,y start position
-    }
-}
+//void drawMessage(char x, char y, char start){ // contains letters to draw
+//    // get letter from sprintf, shift by 20?
+//    // char*m, char x, char y
+//    while (start != '\0' || '0') { // loop through letters
+//        drawLetter(x, y, start); // send 1 letter and x,y start position
+//    }
+//}
 
-void drawLetter(char x, char y, char start) { // (u char, x, y, letter) (x, y, m[i])
-    // find ascii row of character, loop through columns
-    // for i = 0 to 4
-    // for j = 0 to 7
-    // col: from ascii[letter-0x20][i]
-    // on/off = col&0b1
-    // on/off = (col<<j);
-    // drawPixel (x + i, y + j, onoff)
-}
+//void drawLetter(unsigned char x, unsigned char y, unsigned char letter) { // (start x, start y, letter)
+//    for (int c=0; c<=4; c++) { // for each of 5 columns
+//        for (int r=0; r<=7; r++) { // for each of 8 rows
+//            ssd1306_drawPixel(ASCII[c][r]); // how do I tell where the letter is?
+//        }
+//    }
+    
+    // static const char ASCII[96][5]
+    // {0x7e, 0x11, 0x11, 0x11, 0x7e} // 41 A
+    
 
- // {0x7e, 0x11, 0x11, 0x11, 0x7e} // 41 A
- // ASCII[41][5]
+//    col: from ascii[letter-0x20][i]
+//    on/off = col&0b1
+//    on/off = (col<<j);
+//    drawPixel (x + i, y + j, onoff)
+     
+//}

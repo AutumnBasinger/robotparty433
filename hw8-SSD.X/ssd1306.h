@@ -25,12 +25,12 @@
 #define SSD1306_SETSTARTLINE        0x40 
 #define SSD1306_DEACTIVATE_SCROLL   0x2E ///< Stop scroll
 
-void ssd1306_setup(void);
-void ssd1306_update(void);
-void ssd1306_clear(void);
-void ssd1306_drawPixel(unsigned char x, unsigned char y, unsigned char color);
+void ssd1306_setup(void); // init
+void ssd1306_update(void); // send the bits to show the screen
+void ssd1306_clear(void); // sets all bits to 0, still need update
+void ssd1306_drawPixel(unsigned char x, unsigned char y, unsigned char color); // color 1 on, 0 off
 
 /// this should be private
-void ssd1306_command(unsigned char c);
+void ssd1306_command(unsigned char c); // used above, low level i2c write function
 
 #endif
