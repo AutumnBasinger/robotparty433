@@ -63,7 +63,7 @@ int main() {
     
     __builtin_enable_interrupts();
     
-    unsigned char i = 0;
+//    unsigned char i = 0;
     float t = 0;
     int up = 0; // signed 32 bit number
     int tri = 0;
@@ -119,7 +119,7 @@ void initSPI() {
     // Turn of analog pins
     ANSELA = 0; // 1 for analog
     // Make an output pin for CS
-    TRISAbits.TRISA0 = 0; //CS pin
+    TRISAbits.TRISA0 = 0; // CS pin
     LATAbits.LATA0 = 1; // CS pin
     // Set SDO1
     RPA1Rbits.RPA1R = 0b0011;

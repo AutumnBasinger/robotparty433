@@ -96,7 +96,7 @@ int main() {
     unsigned char r;
     
     while (1) {
-        r = mcp_read(0b0100000, GPIO); // 8 bits
+        r = mcp_read(0b0100000, GPIO); // 8 bits // is the button pushed?
         if (r&0b1 == 0b1) { // if button pushed
             mcp_write(0b0100000, OLAT, 0b00000000); // GP7 LED high
         } else {
