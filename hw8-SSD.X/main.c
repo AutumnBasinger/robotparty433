@@ -96,13 +96,8 @@ int main() {
 
     __builtin_enable_interrupts();
     
-//    unsigned char r;
-//    
-//    char message[50];
-//    char i = 0;
-    
-    char message[10]; // 10 letters
-    int t = 0;
+    char message[20]; // 20 letters
+    int hz = 0;
     
     while (1) { 
 
@@ -118,26 +113,19 @@ int main() {
 //        _CP0_SET_COUNT(0); // set 0
 //        while (_CP0_GET_COUNT() < 12000000 ) {} // delay
         
-        // time before to....
-        // set timer here
-        // set count 0
+
+        _CP0_SET_COUNT(0); // set timer to 0
         
-        sprintf(message, "count = %d", t);
-        drawMessage(5,5,message);
+        sprintf(message, "Updates at %d hz", hz); // prints until finds null then stops, float is %f, int is %d
+        drawMessage(2,2,message);
         ssd1306_update();
         
-        // time after this...
-        // read timer here
-        // get count
-        // frequency, took 1 second that's 1 hz, half second is 2 hz (get speed in hz, in the 10s/100s
-   
-        t = t+1;
+        // frequency: 20hz = 20 cycles per second
+        hz = 24000000/_CP0_GET_COUNT();
         
-        // print until find the null, then stop writing, sprintf does this, 
-        // float %f, int %d
-        // * says its an array
-               
-        
+        sprintf(message, "Also hi Nick!");
+        drawMessage(2,12,message);
+        ssd1306_update();
     
     }
 }
@@ -195,7 +183,7 @@ unsigned char mcp_read(unsigned char ad, unsigned char reg) {
 }
 
 
-void drawMessage(char x, char y, char *message){ // contains letters to draw, top left pixel of first letter
+void drawMessage(char x, char y, char *message){ // contains letters to draw, top left pixel of first letter, '*' says it's an array
     int i = 0;
     while (message[i] != 0) {
         drawLetter(x, y, message[i]);
