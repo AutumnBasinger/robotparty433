@@ -116,6 +116,10 @@ int main() {
 
         _CP0_SET_COUNT(0); // set timer to 0
         
+//        sprintf(message, "hello");
+//        drawMessage(2,2,message);
+//        ssd1306_update();
+        
         sprintf(message, "Updates at %d hz", hz); // prints until finds null then stops, float is %f, int is %d
         drawMessage(2,2,message);
         ssd1306_update();
@@ -125,6 +129,9 @@ int main() {
         
         sprintf(message, "Also hi Nick!");
         drawMessage(2,12,message);
+        ssd1306_update();
+        
+        drawLetter(5,5,'b'); // outputs 2
         ssd1306_update();
     
     }
@@ -185,7 +192,7 @@ unsigned char mcp_read(unsigned char ad, unsigned char reg) {
 
 void drawMessage(char x, char y, char *message){ // contains letters to draw, top left pixel of first letter, '*' says it's an array
     int i = 0;
-    while (message[i] != 0) {
+    while (message[i] != 0) { // null
         drawLetter(x, y, message[i]);
         i++;
         x = x+6;
