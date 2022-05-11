@@ -3,8 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/Users/autumn/Documents/dev/robotparty433/hw8-SSD.X/ssd1306.c</file>
             <file>file:/Users/autumn/Documents/dev/robotparty433/hw8-SSD.X/main.c</file>
             <file>file:/Users/autumn/Documents/dev/robotparty433/hw8-SSD.X/font.h</file>
+            <file>file:/Users/autumn/Documents/dev/robotparty433/hw8-SSD.X/i2c_master_noint.c</file>
+            <file>file:/Users/autumn/Documents/dev/robotparty433/hw8-SSD.X/ssd1306.h</file>
         </group>
     </open-files>
 </project-private>
