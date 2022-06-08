@@ -131,8 +131,8 @@ int main() {
         drawMessage(2,12,message);
         ssd1306_update();
         
-        drawLetter(5,5,'b'); // outputs 2
-        ssd1306_update();
+//        drawLetter(5,5,'b'); // outputs 2
+//        ssd1306_update();
     
     }
 }

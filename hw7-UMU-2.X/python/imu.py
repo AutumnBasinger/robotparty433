@@ -4,8 +4,10 @@
 # python -m pip install pyserial
 # sudo apt-get install python-matplotlib
 
+#usbserial-0232C13E
+
 import serial
-ser = serial.Serial('/dev/tty.usbserial-0232C13E', 230400)
+ser = serial.Serial('/dev/tty.usbserial-0232BF39', 230400)
 print('Opening port: ')
 print(ser.name)
 
